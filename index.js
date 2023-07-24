@@ -20,6 +20,7 @@ const client = new MongoClient(uri, {
   }
 });
 
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -33,7 +34,7 @@ async function run() {
     const reviewCollection = client.db("collageDb").collection("studentReview");
 
     // find all data
-    app.get('/collages', async(req, res) => {
+    app.get('/collages', async (req, res) => {
       const cursor = collageCollection.find()
       const result = await cursor.toArray()
       res.send(result)
@@ -42,7 +43,7 @@ async function run() {
     // find single data
     app.get('/collages/:id', async (req, res) => {
       const id = req.params.id
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const user = await collageCollection.findOne(query)
       res.send(user)
     })
@@ -55,25 +56,56 @@ async function run() {
     })
 
     // find student data 
-    app.get('/students', async(req, res) => {
+    app.get('/students', async (req, res) => {
       const cursor = studentCollection.find()
       const result = await cursor.toArray()
       res.send(result)
     })
 
     // find student reviews
-    app.get('/reviews', async(req, res) => {
+    app.get('/reviews', async (req, res) => {
       const cursor = reviewCollection.find()
       const result = await cursor.toArray()
       res.send(result)
     })
 
     // post student review
-    app.post('/reviews', async(req, res) => {
+    app.post('/reviews', async (req, res) => {
       const review = req.body;
       const result = await reviewCollection.insertOne(review)
       res.send(result)
     })
+
+    // get single student data 
+    app.get('/students/:id', async (req, res) => {
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await studentCollection.findOne(query)
+      res.send(result)
+    })
+
+  // update single student data 
+  app.put('/students/:id', async(req, res) => {
+    const id =req.params.id 
+    const filter = {_id: new ObjectId(id)}
+    const options = {upsert: true}
+    const updateStudent = req.body
+    const student = {
+      $set: {
+        collage_name: updateStudent.collage_name, 
+        name: updateStudent.name,
+        subject: updateStudent.subject,
+        email: updateStudent.email,
+        address: updateStudent.address,
+        phone: updateStudent.phone,
+        birth: updateStudent.birth,
+        Image: updateStudent.Image
+      }
+    }
+const result = await studentCollection.updateOne(filter, student, options)
+res.send(result)
+
+  })
 
 
     // Send a ping to confirm a successful connection
